@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lulu's Bowl">
+  <meta name="theme-color" content="#F5F1FA" id="metaTheme">
+  <title>Lulu's Bowl · 创作工作台</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" href="icon-192.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    /* ===== Light Theme (default) ===== */
+    :root {
+      --primary: #B39DDB;
+      --primary-dark: #9575CD;
+      --primary-light: #EDE7F6;
+      --pink: #F8BBD0;
+      --pink-soft: #FCE4EC;
+      --blue: #BBDEFB;
+      --blue-soft: #E3F2FD;
+      --yellow: #FFF9C4;
+      --yellow-soft: #FFF8E1;
+      --green: #C8E6C9;
+      --green-soft: #E8F5E9;
+      --bg: #F5F1FA;
+      --card: #FFFFFF;
+      --text: #2D2D3A;
+      --text-secondary: #9999AA;
+      --text-light: #B5B5C0;
+      --border: #EFEAF6;
+      --success: #81C784;
+      --warning: #FFB74D;
+      --danger: #E57373;
+      --shadow: 0 2px 8px rgba(149,117,205,0.06);
+      --nav-bg: rgba(255,255,255,0.92);
+      --mood-bg: linear-gradient(135deg, #FFFFFF 0%, #F8F4FF 100%);
+    }
+
+    /* ===== Dark Theme ===== */
+    [data-theme="dark"] {
+      --primary: #B39DDB;
+      --primary-dark: #CE93D8;
+      --primary-light: #3E2C5C;
+      --pink: #6D3B5A;
+      --pink-soft: #4A2D3F;
+      --blue: #1E3A5F;
+      --blue-soft: #1A2B42;
+      --yellow: #5C5320;
+      --yellow-soft: #3D3815;
+      --green: #2D4A2D;
+      --green-soft: #1F331F;
+      --bg: #1A1620;
+      --card: #252030;
+      --text: #E8E4F0;
+      --text-secondary: #9999AA;
+      --text-light: #6B6878;
+      --border: #332E3D;
+      --success: #66BB6A;
+      --warning: #FFA726;
+      --danger: #EF5350;
+      --shadow: 0 2px 8px rgba(0,0,0,0.2);
+      --nav-bg: rgba(37,32,48,0.92);
+      --mood-bg: linear-gradient(135deg, #252030 0%, #2D2540 100%);
+    }
+
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.5;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.3s, color 0.3s;
+    }
+    body { padding-bottom: 80px; padding-top: env(safe-area-inset-top); }
+
+    /* Top bar */
+    .topbar {
+      padding: 14px 20px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-logo {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+    }
+    .brand-logo .accent { color: var(--pink); }
+    .topbar-icons { display: flex; gap: 14px; align-items: center; }
+    .topbar-icon {
+      width: 22px; height: 22px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .topbar-icon:active { transform: scale(0.9); }
+    .topbar-icon svg { width: 100%; height: 100%; }
+
+    /* Views */
+    .view { display: none; padding: 0 16px 16px; animation: fadeIn 0.2s; }
+    .view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Home */
+    .greeting-block { padding: 8px 4px 16px; }
+    .greeting-text { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+    .date-text { font-size: 32px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+    .date-meta { font-size: 12px; color: var(--text-secondary); }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .stat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px 16px 16px 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-card::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 0 4px 4px 0; }
+    .stat-card.pink::before { background: var(--pink); }
+    .stat-card.yellow::before { background: #FFD54F; }
+    .stat-card.purple::before { background: var(--primary); }
+    .stat-card.blue::before { background: var(--blue); }
+    .stat-number { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 6px; }
+    .stat-label { font-size: 12px; color: var(--text-secondary); }
+
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .action-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .action-card:active { transform: scale(0.97); }
+    .action-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .action-icon svg { width: 22px; height: 22px; }
+    .action-icon.yellow { background: var(--yellow); color: #F57F17; }
+    .action-icon.purple { background: var(--primary-light); color: var(--primary-dark); }
+    .action-icon.blue { background: var(--blue); color: #1565C0; }
+    .action-icon.pink { background: var(--pink-soft); color: #C2185B; }
+    [data-theme="dark"] .action-icon.yellow { color: #FFD54F; }
+    [data-theme="dark"] .action-icon.blue { color: #64B5F6; }
+    [data-theme="dark"] .action-icon.pink { color: #F48FB1; }
+    .action-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .action-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .action-sub { font-size: 11px; color: var(--text-secondary); }
+
+    .mood-card {
+      background: var(--mood-bg);
+      border-radius: 20px;
+      padding: 32px 20px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .mood-title {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .mood-sub { font-size: 14px; color: var(--text-secondary); }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--nav-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+      z-index: 200;
+    }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px; cursor: pointer; color: var(--text-light); transition: color 0.2s; position: relative; }
+    .nav-item.active { color: var(--primary-dark); }
+    .nav-item .icon { width: 22px; height: 22px; }
+    .nav-item .icon svg { width: 100%; height: 100%; }
+    .nav-item .label { font-size: 10px; font-weight: 600; }
+    .nav-badge { position: absolute; top: 0; right: 20%; background: var(--danger); color: white; font-size: 9px; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-weight: 700; }
+
+    /* Sub-page */
+    .sub-header { padding: 8px 4px 16px; }
+    .sub-title { font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 4px; }
+    .sub-meta { font-size: 12px; color: var(--text-secondary); }
+
+    /* Tab switcher (sub-page) */
+    .tab-switcher { display: flex; gap: 6px; margin-bottom: 16px; background: var(--card); padding: 4px; border-radius: 12px; box-shadow: var(--shadow); }
+    .tab-btn { flex: 1; padding: 8px 12px; border: none; background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: var(--primary); color: white; }
+
+    /* Card */
+    .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+    .card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+    /* Kanban columns */
+    .kanban-col { margin-bottom: 16px; }
+    .kanban-col-header { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; padding: 0 4px; }
+    .kanban-col-count { background: var(--primary-light); color: var(--primary-dark); font-size: 11px; padding: 2px 8px; border-radius: 8px; font-weight: 700; }
+    .kanban-col-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; background: var(--primary); color: white; }
+    .btn:active { transform: scale(0.96); }
+    .btn-secondary { background: var(--primary-light); color: var(--primary-dark); }
+    .btn-danger { background: var(--danger); color: white; opacity: 0.15; }
+    [data-theme="dark"] .btn-danger { opacity: 0.3; }
+    .btn-danger { background: rgba(229,115,115,0.15); color: var(--danger); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+    .btn-full { width: 100%; padding: 14px; font-size: 15px; }
+
+    /* FAB */
+    .fab { position: fixed; right: 20px; bottom: 100px; width: 52px; height: 52px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(179,157,219,0.5); z-index: 150; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .fab:active { transform: scale(0.92); }
+    .fab svg { width: 28px; height: 28px; }
+
+    /* Inputs */
+    input, textarea, select {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 15px; font-family: inherit; background: var(--card); color: var(--text); transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+    input[type="date"] { padding: 0 14px; height: 44px; line-height: 44px; -webkit-appearance: none; }
+    select { -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; height: 44px; line-height: 44px; padding: 0 32px 0 14px; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 80px; height: auto; padding: 10px 14px; line-height: 1.5; }
+    label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+    .form-row .form-group { margin-bottom: 0; display: flex; flex-direction: column; }
+    .form-row .form-group label { margin-bottom: 6px; }
+    .form-row .form-group input,
+    .form-row .form-group select { height: 44px; min-height: 44px; box-sizing: border-box; padding: 0 14px; line-height: 44px; }
+    .form-row .form-group select { -webkit-appearance: none; appearance: none; padding-right: 32px; }
+    .form-row .narrow { grid-column: span 1; }
+    .form-row .narrow select { width: 100%; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row > * { flex: 1; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: none; align-items: flex-end; justify-content: center; animation: fadeIn 0.2s; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--card); width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; animation: slideUp 0.25s; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h3 { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-header h3 svg { width: 18px; height: 18px; color: var(--primary); }
+    .modal-close { background: none; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; padding: 0 4px; }
+
+    /* List items */
+    .list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; background: var(--card); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow); }
+    .list-item-content { flex: 1; min-width: 0; }
+    .list-item-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; word-break: break-word; }
+    .list-item-desc { font-size: 13px; color: var(--text-secondary); word-break: break-word; }
+    .list-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* Tags */
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .tag-pending { background: var(--yellow-soft); color: #E65100; }
+    .tag-accepted { background: var(--green-soft); color: #2E7D32; }
+    .tag-rejected { background: rgba(229,115,115,0.15); color: var(--danger); }
+    .tag-selecting { background: var(--blue-soft); color: #1565C0; }
+    .tag-editing { background: var(--yellow-soft); color: #F57F17; }
+    .tag-published { background: var(--primary-light); color: var(--primary-dark); }
+
+    /* Star rating */
+    .stars { display: flex; gap: 4px; margin-top: 4px; }
+    .star-btn { width: 28px; height: 28px; cursor: pointer; color: var(--border); transition: color 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; }
+    .star-btn:active { transform: scale(0.85); }
+    .star-btn svg { width: 24px; height: 24px; }
+    .star-btn.active { color: #FFB74D; }
+    .star-display { display: inline-flex; gap: 1px; }
+    .star-display svg { width: 12px; height: 12px; }
+    .star-display .filled { color: #FFB74D; }
+    .star-display .empty { color: var(--border); }
+
+    /* Type chips */
+    .type-chips { display: flex; gap: 8px; margin-bottom: 14px; }
+    .type-chip { flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; background: var(--card); }
+    .type-chip.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+
+    /* Inventory selector */
+    .inv-select { max-height: 180px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 10px; padding: 6px; }
+    .inv-select-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 13px; }
+    .inv-select-item:active { background: var(--primary-light); }
+    .inv-select-item.selected { background: var(--primary-light); font-weight: 600; color: var(--primary-dark); }
+    .inv-select-item .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .inv-select-empty { padding: 16px; text-align: center; font-size: 12px; color: var(--text-secondary); }
+    .linked-inv { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .linked-inv-item { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 8px; font-size: 10px; background: var(--blue-soft); color: #1565C0; }
+    [data-theme="dark"] .linked-inv-item { color: #64B5F6; }
+    .linked-inv-item .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+
+    /* Category chips */
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .cat-chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: var(--border); cursor: pointer; transition: background 0.15s; color: var(--text); }
+    .cat-chip:active { background: var(--primary-light); }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+    .empty .icon-wrap { width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.4; }
+    .empty .icon-wrap svg { width: 100%; height: 100%; }
+    .empty p { font-size: 14px; }
+
+    /* Calendar */
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 12px; }
+    .day-cell { aspect-ratio: 1; border-radius: 8px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; position: relative; box-shadow: var(--shadow); }
+    .day-cell.today { background: var(--primary-light); font-weight: 700; color: var(--primary-dark); }
+    .day-cell.has-event::after { content: ''; width: 5px; height: 5px; background: var(--primary); border-radius: 50%; position: absolute; bottom: 3px; }
+    .day-cell .day-num { font-size: 13px; font-weight: 600; }
+    .day-cell .day-label { font-size: 9px; color: var(--text-secondary); }
+
+    /* Inventory item */
+    .inv-bar { height: 4px; border-radius: 2px; margin-top: 6px; background: var(--border); overflow: hidden; }
+    .inv-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+    /* Checkbox */
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--card); border-radius: 12px; margin-bottom: 8px; box-shadow: var(--shadow); }
+    .check-item.done { opacity: 0.5; }
+    .check-item.done .check-label { text-decoration: line-through; }
+    .check-circle { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; border: 2px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .check-circle.checked { background: var(--success); border-color: var(--success); color: white; }
+    .check-circle svg { display: none; width: 14px; height: 14px; }
+    .check-circle.checked svg { display: block; }
+    .check-label { flex: 1; font-size: 14px; word-break: break-word; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(45,45,58,0.85); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 400; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    [data-theme="dark"] .toast { background: rgba(232,228,240,0.9); color: #1A1620; }
+    .toast.show { opacity: 1; }
+
+    .text-sm { font-size: 12px; }
+    .text-muted { color: var(--text-secondary); }
+    .mt-2 { margin-top: 8px; }
+
+    /* Install banner */
+    .install-banner { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 12px 16px; margin: 0 16px 12px; border-radius: 12px; display: none; align-items: center; gap: 10px; font-size: 13px; }
+    .install-banner.show { display: flex; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand-logo">Lulu's<span class="accent">Bowl</span></div>
+  <div class="topbar-icons">
+    <span class="topbar-icon" id="tbThemeIcon" onclick="toggleTheme()"></span>
+    <span class="topbar-icon" id="tbDownloadIcon"></span>
+  </div>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span style="flex:1">点击下方提示，将工作台添加到桌面，像APP一样使用</span>
+</div>
+
+<!-- ===== Home ===== -->
+<div class="view active" id="view-home">
+  <div class="greeting-block">
+    <div class="greeting-text" id="greetingText">晚上好, Lulu</div>
+    <div class="date-text" id="dateText">2026年7月25日</div>
+    <div class="date-meta" id="dateMeta">星期六 · 本周已发布 0/3 视频</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card pink">
+      <div class="stat-number" id="statSelecting">0</div>
+      <div class="stat-label">选题中视频</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-number" id="statShoppingCount">0</div>
+      <div class="stat-label">购物清单</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-number" id="statIdeas">0</div>
+      <div class="stat-label">灵感总数</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-number" id="statPRCount">0</div>
+      <div class="stat-label">合作管理</div>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <div class="action-card" onclick="quickAdd('idea')">
+      <div class="action-icon yellow" id="acIdeaIcon"></div>
+      <div class="action-text"><span class="action-title">记灵感</span><span class="action-sub">抓住瞬间想法</span></div>
+    </div>
+    <div class="action-card" onclick="quickAdd('content')">
+      <div class="action-icon purple" id="acVideoIcon"></div>
+      <div class="action-text"><span class="action-title">新建视频</span><span class="action-sub">添加选题排期</span></div>
+    </div>
+    <div class="action-card" onclick="quickAdd('inventory')">
+      <div class="action-icon blue" id="acFoodIcon"></div>
+      <div class="action-text"><span class="action-title">记食材</span><span class="action-sub">入库与保质期</span></div>
+    </div>
+    <div class="action-card" onclick="quickAdd('pr')">
+      <div class="action-icon pink" id="acPrIcon"></div>
+      <div class="action-text"><span class="action-title">记合作</span><span class="action-sub">PR邀请管理</span></div>
+    </div>
+  </div>
+
+  <div class="mood-card">
+    <div class="mood-title">Lulu's Bowl</div>
+    <div class="mood-sub" id="moodText">一切就绪，享受创作时光吧</div>
+  </div>
+</div>
+
+<!-- ===== Calendar (排期) ===== -->
+<div class="view" id="view-calendar">
+  <div class="sub-header">
+    <div class="sub-title">视频排期</div>
+    <div class="sub-meta">安排与追踪视频进度</div>
+  </div>
+  <div class="tab-switcher">
+    <button class="tab-btn active" onclick="switchCalTab('kanban', this)">状态看板</button>
+    <button class="tab-btn" onclick="switchCalTab('week', this)">周历视图</button>
+  </div>
+  <div id="calKanban">
+    <div class="kanban-col">
+      <div class="kanban-col-header"><span class="kanban-col-dot" style="background:var(--blue)"></span> 选题中 <span class="kanban-col-count" id="cntSelecting">0</span></div>
+      <div id="kanbanSelecting"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header"><span class="kanban-col-dot" style="background:var(--yellow)"></span> 剪辑中 <span class="kanban-col-count" id="cntEditing">0</span></div>
+      <div id="kanbanEditing"></div>
+    </div>
+  </div>
+  <div id="calWeek" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span id="weekRangeText">本周</span>
+        <span>
+          <button class="btn btn-sm btn-secondary" onclick="changeWeek(-1)">‹</button>
+          <button class="btn btn-sm btn-secondary" onclick="changeWeek(1)">›</button>
+        </span>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+      <div id="weekEvents"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">已发布</div>
+    <div id="publishedList"></div>
+  </div>
+</div>
+
+<!-- ===== PR (合作) ===== -->
+<div class="view" id="view-pr">
+  <div class="sub-header">
+    <div class="sub-title">PR合作</div>
+    <div class="sub-meta">品牌合作邀请管理</div>
+  </div>
+  <div class="card">
+    <div class="card-title">合作邀请</div>
+    <div id="prList"></div>
+  </div>
+</div>
+
+<!-- ===== Ideas (灵感) ===== -->
+<div class="view" id="view-ideas">
+  <div class="sub-header">
+    <div class="sub-title">灵感速记</div>
+    <div class="sub-meta">随时记录闪现的创意</div>
+  </div>
+  <div class="card">
+    <div style="margin-bottom:12px">
+      <textarea id="quickIdeaInput" placeholder="闪现的灵感、选题、脚本片段..." style="min-height:60px"></textarea>
+    </div>
+    <button class="btn btn-full" onclick="addQuickIdea()">快速保存</button>
+  </div>
+  <div class="tab-switcher">
+    <button class="tab-btn active" onclick="switchIdeaFilter('all', this)">全部</button>
+    <button class="tab-btn" onclick="switchIdeaFilter('选材创意', this)">选材创意</button>
+    <button class="tab-btn" onclick="switchIdeaFilter('拍摄/剪辑创意', this)">拍摄/剪辑</button>
+  </div>
+  <div id="ideasList"></div>
+</div>
+
+<!-- ===== Inventory (库存) ===== -->
+<div class="view" id="view-inventory">
+  <div class="sub-header">
+    <div class="sub-title">食材库存</div>
+    <div class="sub-meta">追踪食材保质期</div>
+  </div>
+  <div class="card" style="padding:12px">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm btn-secondary" id="tabInventoryBtn" style="flex:1;padding:8px" onclick="switchView('inventory')">库存</button>
+      <button class="btn btn-sm" id="tabShoppingBtn" style="flex:1;padding:8px;background:var(--border);color:var(--text-secondary)" onclick="switchView('shopping')">购物清单</button>
+    </div>
+    <div id="inventoryList"></div>
+  </div>
+</div>
+
+<div class="view" id="view-shopping">
+  <div class="sub-header">
+    <div class="sub-title">购物清单</div>
+    <div class="sub-meta">需要补货的食材</div>
+  </div>
+  <div class="card" style="padding:12px">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-sm" id="tabInventoryBtn2" style="flex:1;padding:8px;background:var(--border);color:var(--text-secondary)" onclick="switchView('inventory')">库存</button>
+      <button class="btn btn-sm btn-secondary" id="tabShoppingBtn2" style="flex:1;padding:8px" onclick="switchView('shopping')">购物清单</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="quickShoppingInput" placeholder="加入购物清单..." style="flex:1">
+      <button class="btn" onclick="addQuickShopping()" style="flex:0 0 auto;padding:0 16px">+</button>
+    </div>
+    <div id="shoppingList"></div>
+  </div>
+</div>
+
+<button class="fab" id="fab" onclick="fabAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" data-view="home" onclick="switchView('home')">
+    <span class="icon" id="navHomeIcon"></span><span class="label">看板</span>
+  </div>
+  <div class="nav-item" data-view="calendar" onclick="switchView('calendar')">
+    <span class="icon" id="navCalIcon"></span><span class="label">排期</span>
+  </div>
+  <div class="nav-item" data-view="inventory" onclick="switchView('inventory')">
+    <span class="icon" id="navInvIcon"></span><span class="label">库存</span>
+  </div>
+  <div class="nav-item" data-view="ideas" onclick="switchView('ideas')">
+    <span class="icon" id="navIdeaIcon"></span><span class="label">灵感</span>
+  </div>
+  <div class="nav-item" data-view="pr" onclick="switchView('pr')">
+    <span class="icon" id="navPrIcon"></span><span class="label">合作</span>
+    <span class="nav-badge" id="prBadge" style="display:none">0</span>
+  </div>
+</div>
+
+<script>
+// ===== SVG Icons =====
+const Svg = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>',
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v9a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-9"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>',
+  handshake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6l-3-3H5L2 6v3l3 3h2v4h4v-2"/><path d="M8 6l3-3h8l3 3v3l-3 3h-2"/></svg>',
+  lightbulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.58-.6 1.21-1.22 1.56-2.03A5.5 5.5 0 006.3 9.2c-.2 1.2.2 2.4 1.1 3.3l.7.7V14h7l.99-.7z"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3 7l9 5 9-5"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+  basket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5L3 9z"/><path d="M8 9V5a4 4 0 118 0v4"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6M19 8v6"/><path d="M19 8v6"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  starOutline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
+  cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>'
+};
+
+const IconMap = {
+  'tbDownloadIcon': Svg.download,
+  'acIdeaIcon': Svg.lightbulb,
+  'acVideoIcon': Svg.video,
+  'acFoodIcon': Svg.basket,
+  'acPrIcon': Svg.people,
+  'navHomeIcon': Svg.home,
+  'navCalIcon': Svg.calendar,
+  'navPrIcon': Svg.people,
+  'navIdeaIcon': Svg.lightbulb,
+  'navInvIcon': Svg.box
+};
+function injectIcons() {
+  for (const [id, svg] of Object.entries(IconMap)) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = svg;
+  }
+}
+
+// ===== Theme =====
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  if (next === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  localStorage.setItem('lulu_theme', next);
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('tbThemeIcon').innerHTML = isDark ? Svg.sun : Svg.moon;
+  document.getElementById('metaTheme').setAttribute('content', isDark ? '#1A1620' : '#F5F1FA');
+}
+function loadTheme() {
+  const saved = localStorage.getItem('lulu_theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  updateThemeIcon();
+}
+
+// ===== Data Layer =====
+const DB = {
+  get(key, def=[]) { try { return JSON.parse(localStorage.getItem('lulu_'+key)) || def; } catch(e) { return def; } },
+  set(key, val) { localStorage.setItem('lulu_'+key, JSON.stringify(val)); }
+};
+
+let currentView = 'home';
+let currentWeekOffset = 0;
+let editingId = null;
+let ideaFilter = 'all';
+let calTab = 'kanban';
+let tempStarRating = 0;
+let tempIdeaType = '选材创意';
+
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function getWeekStart(offset=0) { const d = new Date(); d.setDate(d.getDate() - d.getDay() + (offset*7)); return d; }
+function fmtDate(d) { return `${d.getMonth()+1}月${d.getDate()}日`; }
+function daysBetween(d1, d2) { return Math.round((new Date(d2) - new Date(d1)) / 86400000); }
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 6) return '夜深啦, Lulu';
+  if (h < 11) return '早上好, Lulu';
+  if (h < 14) return '中午好, Lulu';
+  if (h < 18) return '下午好, Lulu';
+  if (h < 22) return '晚上好, Lulu';
+  return '夜深啦, Lulu';
+}
+function getWeekdayCN(d) { return ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()]; }
+
+// ===== Category helpers =====
+function getUsedCategories() {
+  const inv = DB.get('inventory');
+  return [...new Set(inv.map(i => i.category).filter(Boolean))];
+}
+function catColor(category) {
+  const colors = { '肉类': '#E57373', '蔬菜': '#81C784', '水果': '#FFD54F', '其他': '#90CAF9' };
+  if (colors[category]) return colors[category];
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 60%, 70%)`;
+}
+
+// ===== Inventory selector =====
+function renderIdeaSelector(selectedIds, selectorId) {
+  const ideas = DB.get('ideas');
+  if (ideas.length === 0) return '<div class="inv-select-empty">还没有灵感记录</div>';
+  return `<div class="inv-select" id="${selectorId}">${ideas.map(item => {
+    const sel = selectedIds.includes(item.id) ? 'selected' : '';
+    const stars = item.rating ? renderStarDisplay(item.rating) : '';
+    return `<div class="inv-select-item ${sel}" data-id="${item.id}" onclick="toggleInvSelect(this,'${selectorId}')">
+      <span style="flex:1">${escapeHtml(item.text.substring(0, 30))}${item.text.length > 30 ? '...' : ''}</span>
+      ${stars}
+      <span style="font-size:10px;color:var(--text-light);background:var(--primary-light);padding:1px 5px;border-radius:4px">${item.type || '灵感'}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderInvSelector(selectedIds, selectorId) {
+  const inv = DB.get('inventory');
+  const shopping = DB.get('shopping').filter(s => !s.done);
+  if (inv.length === 0 && shopping.length === 0) return '<div class="inv-select-empty">库存和购物清单都是空的</div>';
+  let html = `<div class="inv-select" id="${selectorId}">`;
+  if (inv.length > 0) {
+    html += inv.map(item => {
+      const sel = selectedIds.includes(item.id) ? 'selected' : '';
+      return `<div class="inv-select-item ${sel}" data-id="${item.id}" onclick="toggleInvSelect(this,'${selectorId}')">
+        <span class="dot" style="background:${catColor(item.category)}"></span>
+        <span style="flex:1">${escapeHtml(item.name)} ${item.amount ? '×'+item.amount : ''}</span>
+        <span style="font-size:10px;color:var(--text-light);background:var(--primary-light);padding:1px 5px;border-radius:4px">库存</span>
+      </div>`;
+    }).join('');
+  }
+  if (shopping.length > 0) {
+    html += shopping.map(item => {
+      const sel = selectedIds.includes(item.id) ? 'selected' : '';
+      return `<div class="inv-select-item ${sel}" data-id="${item.id}" onclick="toggleInvSelect(this,'${selectorId}')">
+        <span class="dot" style="background:var(--warning)"></span>
+        <span style="flex:1">${escapeHtml(item.name)} ${item.qty ? '×'+item.qty : ''}</span>
+        <span style="font-size:10px;color:var(--text-light);background:var(--yellow-soft);padding:1px 5px;border-radius:4px">购物</span>
+      </div>`;
+    }).join('');
+  }
+  html += '</div>';
+  return html;
+}
+function toggleInvSelect(el, selectorId) { el.classList.toggle('selected'); }
+function getSelectedInvIds(selectorId) {
+  const c = document.getElementById(selectorId);
+  if (!c) return [];
+  return Array.from(c.querySelectorAll('.inv-select-item.selected')).map(el => el.dataset.id);
+}
+function renderLinkedIdeas(ids) {
+  if (!ids || ids.length === 0) return '';
+  const ideas = DB.get('ideas');
+  const items = ids.map(id => ideas.find(i => i.id === id)).filter(Boolean);
+  if (items.length === 0) return '';
+  return `<div class="linked-inv">${items.map(i => `<span class="linked-inv-item" style="background:var(--primary-light);color:var(--primary-dark)"><span style="font-size:10px">💡</span>${escapeHtml(i.text.substring(0,15))}${i.text.length>15?'...':''}</span>`).join('')}</div>`;
+}
+
+function renderLinkedInv(ids) {
+  if (!ids || ids.length === 0) return '';
+  const inv = DB.get('inventory');
+  const items = ids.map(id => inv.find(i => i.id === id)).filter(Boolean);
+  if (items.length === 0) return '';
+  return `<div class="linked-inv">${items.map(i => `<span class="linked-inv-item"><span class="dot" style="background:${catColor(i.category)}"></span>${escapeHtml(i.name)}</span>`).join('')}</div>`;
+}
+
+// ===== Star rating =====
+function renderStarInput(currentRating, containerId) {
+  let html = `<div class="stars" id="${containerId}">`;
+  for (let i = 1; i <= 5; i++) {
+    html += `<span class="star-btn ${i <= currentRating ? 'active' : ''}" data-rating="${i}" onclick="setStarRating(${i})">${i <= currentRating ? Svg.star : Svg.starOutline}</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+function setStarRating(rating) {
+  tempStarRating = rating;
+  const container = document.querySelector('.stars');
+  if (!container) return;
+  const stars = container.querySelectorAll('.star-btn');
+  stars.forEach((s, idx) => {
+    s.classList.toggle('active', idx < rating);
+    s.innerHTML = idx < rating ? Svg.star : Svg.starOutline;
+  });
+}
+function renderStarDisplay(rating) {
+  let html = '<span class="star-display">';
+  for (let i = 1; i <= 5; i++) {
+    html += i <= rating ? `<span class="filled">${Svg.star}</span>` : `<span class="empty">${Svg.starOutline}</span>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+// ===== View switching =====
+function switchView(view) {
+  if (view === 'shopping') {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-shopping').classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-view="inventory"]').classList.add('active');
+    currentView = 'shopping';
+    renderShopping();
+    updateFab();
+    return;
+  }
+  if (view === 'inventory') {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-inventory').classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('[data-view="inventory"]').classList.add('active');
+    currentView = 'inventory';
+    renderInventory();
+    updateFab();
+    return;
+  }
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  currentView = view;
+  if (view === 'home') renderHome();
+  if (view === 'calendar') renderCalendar();
+  if (view === 'pr') renderPR();
+  if (view === 'ideas') renderIdeas();
+  updateFab();
+}
+
+function updateFab() {
+  const fab = document.getElementById('fab');
+  const actions = {
+    home: () => quickAdd('idea'),
+    calendar: () => quickAdd('content'),
+    pr: () => quickAdd('pr'),
+    ideas: () => { document.getElementById('quickIdeaInput').focus(); },
+    inventory: () => quickAdd('inventory'),
+    shopping: () => { document.getElementById('quickShoppingInput').focus(); }
+  };
+  fab.style.display = actions[currentView] ? 'flex' : 'none';
+}
+function fabAction() {
+  const actions = {
+    home: () => quickAdd('idea'),
+    calendar: () => quickAdd('content'),
+    pr: () => quickAdd('pr'),
+    ideas: () => { document.getElementById('quickIdeaInput').focus(); },
+    inventory: () => quickAdd('inventory'),
+    shopping: () => { document.getElementById('quickShoppingInput').focus(); }
+  };
+  if (actions[currentView]) actions[currentView]();
+}
+
+// ===== Home =====
+function renderHome() {
+  const contents = DB.get('content');
+  const prs = DB.get('pr');
+  const ideas = DB.get('ideas');
+  const inv = DB.get('inventory');
+  const shopping = DB.get('shopping');
+
+  const selecting = contents.filter(c => c.status === 'selecting').length;
+  const editing = contents.filter(c => c.status === 'editing').length;
+  const weekPublished = contents.filter(c => c.status === 'published').length;
+
+  document.getElementById('statSelecting').textContent = selecting;
+  document.getElementById('statShoppingCount').textContent = shopping.filter(s => !s.done).length;
+  document.getElementById('statIdeas').textContent = ideas.length;
+  document.getElementById('statPRCount').textContent = prs.filter(p => p.status === 'pending').length;
+
+  document.getElementById('dateMeta').textContent = `${getWeekdayCN(new Date())} · 已发布 ${weekPublished} 个视频`;
+
+  const mood = document.getElementById('moodText');
+  if (selecting + editing === 0 && weekPublished === 0) {
+    mood.textContent = '一切就绪，享受创作时光吧';
+  } else if (weekPublished > 0) {
+    mood.textContent = `已发布 ${weekPublished} 个视频，继续加油`;
+  } else {
+    mood.textContent = `${selecting + editing} 个视频进行中，继续加油`;
+  }
+}
+
+function statusLabel(s) {
+  return { selecting: '选题中', editing: '剪辑中', published: '已发布' }[s] || s;
+}
+
+// ===== Calendar =====
+function switchCalTab(tab, btn) {
+  calTab = tab;
+  document.querySelectorAll('#view-calendar .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('calKanban').style.display = tab === 'kanban' ? 'block' : 'none';
+  document.getElementById('calWeek').style.display = tab === 'week' ? 'block' : 'none';
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const contents = DB.get('content');
+  const prs = DB.get('pr');
+
+  // Kanban: selecting
+  const selectingItems = contents.filter(c => c.status === 'selecting').sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const editingItems = contents.filter(c => c.status === 'editing').sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  document.getElementById('cntSelecting').textContent = selectingItems.length;
+  document.getElementById('cntEditing').textContent = editingItems.length;
+
+  document.getElementById('kanbanSelecting').innerHTML = selectingItems.length === 0
+    ? '<div class="empty" style="padding:20px"><p>暂无选题中的视频</p></div>'
+    : selectingItems.map(c => renderKanbanCard(c)).join('');
+
+  document.getElementById('kanbanEditing').innerHTML = editingItems.length === 0
+    ? '<div class="empty" style="padding:20px"><p>暂无剪辑中的视频</p></div>'
+    : editingItems.map(c => renderKanbanCard(c)).join('');
+
+  // Published list
+  const published = contents.filter(c => c.status === 'published').sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  document.getElementById('publishedList').innerHTML = published.length === 0
+    ? '<div class="empty" style="padding:20px"><p>暂无已发布视频</p></div>'
+    : published.slice(0, 5).map(c => `
+      <div class="list-item" onclick="editContent('${c.id}')">
+        <div class="list-item-content">
+          <div class="list-item-title">${c.title}</div>
+          <div class="list-item-desc">${c.date||''} ${c.note ? '· ' + c.note : ''}</div>
+          ${renderLinkedIdeas(c.relatedIdeas)}
+          ${renderLinkedInv(c.relatedInv)}
+        </div>
+        <span class="tag tag-published">已发布</span>
+      </div>
+    `).join('');
+
+  // Week view
+  const weekStart = getWeekStart(currentWeekOffset);
+  const labels = ['日','一','二','三','四','五','六'];
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate()+i);
+    const dStr = d.toISOString().slice(0,10);
+    const hasEvent = contents.some(c => c.date === dStr) || prs.some(p => p.date === dStr);
+    const isToday = dStr === todayStr();
+    html += `<div class="day-cell ${isToday?'today':''} ${hasEvent?'has-event':''}">
+      <span class="day-label">${labels[i]}</span>
+      <span class="day-num">${d.getDate()}</span>
+    </div>`;
+  }
+  document.getElementById('weekGrid').innerHTML = html;
+
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+  document.getElementById('weekRangeText').textContent = `${fmtDate(weekStart)} - ${fmtDate(weekEnd)}`;
+
+  const events = [];
+  contents.filter(c => c.date >= weekStart.toISOString().slice(0,10) && c.date <= weekEnd.toISOString().slice(0,10)).forEach(c => {
+    events.push({ date: c.date, title: c.title, tag: `<span class="tag tag-${c.status}">${statusLabel(c.status)}</span>` });
+  });
+  prs.filter(p => p.date >= weekStart.toISOString().slice(0,10) && p.date <= weekEnd.toISOString().slice(0,10)).forEach(p => {
+    events.push({ date: p.date, title: `${p.brand} PR合作`, tag: `<span class="tag tag-${p.status}">${prStatusLabel(p.status)}</span>` });
+  });
+  events.sort((a,b) => a.date.localeCompare(b.date));
+
+  const eventsEl = document.getElementById('weekEvents');
+  eventsEl.innerHTML = events.length === 0
+    ? '<div class="text-muted text-sm" style="text-align:center;padding:12px">本周暂无安排</div>'
+    : events.map(e => `<div style="display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;flex:1">${e.title}</span>${e.tag}</div>`).join('');
+}
+
+function renderKanbanCard(c) {
+  return `<div class="list-item" onclick="editContent('${c.id}')">
+    <div class="list-item-content">
+      <div class="list-item-title">${c.title}</div>
+      <div class="list-item-desc">${c.date||''} ${c.note ? '· ' + c.note : ''}</div>
+      ${renderLinkedIdeas(c.relatedIdeas)}
+      ${renderLinkedInv(c.relatedInv)}
+    </div>
+    <span class="tag tag-${c.status}">${statusLabel(c.status)}</span>
+  </div>`;
+}
+
+function changeWeek(offset) { currentWeekOffset += offset; renderCalendar(); }
+function prStatusLabel(s) { return { pending: '待回复', accepted: '已接受', rejected: '已婉拒' }[s] || s; }
+
+// ===== PR =====
+function renderPR() {
+  const prs = DB.get('pr');
+  const pendingCount = prs.filter(p => p.status === 'pending').length;
+  const badge = document.getElementById('prBadge');
+  if (pendingCount > 0) { badge.textContent = pendingCount; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+
+  const sorted = [...prs].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const list = document.getElementById('prList');
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon-wrap">'+Svg.people+'</div><p>还没有PR合作记录<br>点击右下角 + 记录新的合作邀请</p></div>';
+  } else {
+    list.innerHTML = sorted.map(p => {
+      let desc = p.date || '';
+      if (p.product) desc += ' · ' + p.product;
+      if (p.fee) desc += '<br>报价：' + p.fee;
+      if (p.deadline) desc += ' · 截止 ' + p.deadline;
+      if (p.note) desc += '<br>' + p.note;
+      return `<div class="list-item">
+        <div class="list-item-content" onclick="editPR('${p.id}')">
+          <div class="list-item-title">${p.brand}</div>
+          <div class="list-item-desc">${desc}</div>
+        </div>
+        <div class="list-item-actions"><span class="tag tag-${p.status}">${prStatusLabel(p.status)}</span></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ===== Ideas =====
+function switchIdeaFilter(filter, btn) {
+  ideaFilter = filter;
+  document.querySelectorAll('#view-ideas .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderIdeas();
+}
+
+function renderIdeas() {
+  const ideas = DB.get('ideas');
+  let filtered = ideas;
+  if (ideaFilter !== 'all') {
+    filtered = ideas.filter(i => i.type === ideaFilter);
+  }
+  const sorted = [...filtered].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+  const list = document.getElementById('ideasList');
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon-wrap">'+Svg.lightbulb+'</div><p>' + (ideaFilter === 'all' ? '灵感还没来敲门～' : '这个分类下还没有灵感') + '</p></div>';
+  } else {
+    list.innerHTML = sorted.map(i => `
+      <div class="list-item">
+        <div class="list-item-content" onclick="editIdea('${i.id}')">
+          <div class="list-item-title">${escapeHtml(i.text)}</div>
+          <div class="list-item-desc">
+            ${(i.createdAt||'').slice(0,16).replace('T',' ')}
+            ${i.type ? '· ' + i.type : ''}
+            ${i.rating ? '<br>' + renderStarDisplay(i.rating) : ''}
+          </div>
+          ${renderLinkedInv(i.relatedInv)}
+        </div>
+        <div class="list-item-actions">
+          ${i.type ? `<span class="tag tag-selecting">${i.type}</span>` : ''}
+          <button class="btn btn-sm btn-danger" onclick="deleteIdea('${i.id}')">删</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function addQuickIdea() {
+  const text = document.getElementById('quickIdeaInput').value.trim();
+  if (!text) { showToast('请输入灵感内容'); return; }
+  const ideas = DB.get('ideas');
+  ideas.push({ id: uid(), text, type: '选材创意', rating: 0, relatedInv: [], createdAt: new Date().toISOString() });
+  DB.set('ideas', ideas);
+  document.getElementById('quickIdeaInput').value = '';
+  renderIdeas();
+  showToast('灵感已记录（可在编辑中设置类型/星级/食材）');
+}
+
+// ===== Shopping =====
+function renderShopping() {
+  const shopping = DB.get('shopping');
+  const undone = shopping.filter(s => !s.done);
+  const done = shopping.filter(s => s.done);
+  const list = document.getElementById('shoppingList');
+  let html = '';
+  if (undone.length === 0 && done.length === 0) {
+    html = '<div class="empty"><div class="icon-wrap">'+Svg.cart+'</div><p>购物清单是空的<br>上方输入框直接添加吧</p></div>';
+  } else {
+    if (undone.length > 0) {
+      html += undone.map(s => `<div class="check-item"><div class="check-circle" onclick="toggleShopping('${s.id}')">${Svg.check}</div><span class="check-label">${s.category ? '<span class="tag tag-selecting" style="margin-right:4px">'+s.category+'</span>' : ''}${escapeHtml(s.name)} ${s.qty ? '<span class="text-muted">· '+escapeHtml(s.qty)+'</span>' : ''}</span><button class="btn btn-sm btn-danger" onclick="deleteShopping('${s.id}')">删</button></div>`).join('');
+    }
+    if (done.length > 0) {
+      html += '<div class="text-muted text-sm" style="padding:10px 4px 6px">已完成</div>';
+      html += done.map(s => `<div class="check-item done"><div class="check-circle checked" onclick="toggleShopping('${s.id}')">${Svg.check}</div><span class="check-label">${s.category ? '<span class="tag tag-selecting" style="margin-right:4px">'+s.category+'</span>' : ''}${escapeHtml(s.name)}</span><button class="btn btn-sm btn-danger" onclick="deleteShopping('${s.id}')">删</button></div>`).join('');
+    }
+  }
+  list.innerHTML = html;
+}
+
+function addQuickShopping() {
+  const name = document.getElementById('quickShoppingInput').value.trim();
+  if (!name) { showToast('请输入要购买的物品'); return; }
+  const shopping = DB.get('shopping');
+  shopping.push({ id: uid(), name, qty: '', category: '', done: false, createdAt: new Date().toISOString() });
+  DB.set('shopping', shopping);
+  document.getElementById('quickShoppingInput').value = '';
+  renderShopping();
+  showToast('已加入购物清单');
+}
+function toggleShopping(id) { const s = DB.get('shopping'); const item = s.find(x => x.id === id); if (item) { item.done = !item.done; DB.set('shopping', s); renderShopping(); } }
+function deleteShopping(id) { DB.set('shopping', DB.get('shopping').filter(s => s.id !== id)); renderShopping(); }
+
+// ===== Inventory =====
+function renderInventory() {
+  const inv = DB.get('inventory');
+  const sorted = [...inv].sort((a,b) => {
+    if (a.expiry && b.expiry) return a.expiry.localeCompare(b.expiry);
+    if (a.expiry) return -1;
+    if (b.expiry) return 1;
+    return 0;
+  });
+  const list = document.getElementById('inventoryList');
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="icon-wrap">'+Svg.box+'</div><p>库存空空如也<br>点击右下角 + 添加食材</p></div>';
+  } else {
+    list.innerHTML = sorted.map(i => {
+      let expiryBar = '';
+      let expiryInfo = '';
+      if (i.expiry) {
+        const days = daysBetween(todayStr(), i.expiry);
+        const color = days < 0 ? 'var(--danger)' : days <= 1 ? 'var(--danger)' : days <= 3 ? 'var(--warning)' : 'var(--success)';
+        const pct = Math.max(5, Math.min(100, ((days+1)/7)*100));
+        expiryBar = `<div class="inv-bar"><div class="inv-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+        expiryInfo = days < 0 ? `已过期${-days}天` : days === 0 ? '今天到期' : `${days}天后到期`;
+      }
+      const amountText = i.amount ? ` × ${i.amount}${i.unit||''}` : '';
+      const catLabel = i.category || '未分类';
+      const cc = catColor(i.category);
+      let descParts = [];
+      if (i.stockDate) descParts.push('入库 ' + i.stockDate);
+      if (expiryInfo) descParts.push(expiryInfo);
+      if (i.note) descParts.push(i.note);
+      return `<div class="list-item">
+        <div class="list-item-content" onclick="editInventory('${i.id}')">
+          <div class="list-item-title"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${cc};margin-right:6px;vertical-align:middle"></span>${catLabel} · ${escapeHtml(i.name)}${amountText}</div>
+          <div class="list-item-desc">${descParts.join(' · ')}</div>
+          ${expiryBar}
+        </div>
+        <div class="list-item-actions"><button class="btn btn-sm btn-danger" onclick="deleteInventory('${i.id}')">删</button></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ===== Quick Add / Modals =====
+function quickAdd(type) {
+  editingId = null;
+  if (type === 'idea') {
+    tempStarRating = 0;
+    tempIdeaType = '选材创意';
+    openModal(`
+      <div class="modal-header"><h3>${Svg.lightbulb} 记录灵感</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="form-group">
+        <label>类型</label>
+        <div class="type-chips">
+          <div class="type-chip active" onclick="setIdeaType('选材创意', this)">选材创意</div>
+          <div class="type-chip" onclick="setIdeaType('拍摄/剪辑创意', this)">拍摄/剪辑创意</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>内容</label>
+        <textarea id="modal_idea_text" placeholder="写下你的灵感..." style="min-height:100px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>重要程度</label>
+        ${renderStarInput(0, 'starInput')}
+      </div>
+      <div class="form-group">
+        <label>相关食材（可选）</label>
+        ${renderInvSelector([], 'invSelectIdea')}
+      </div>
+      <button class="btn btn-full" onclick="saveIdea()">保存灵感</button>
+    `);
+  } else if (type === 'content') {
+    openModal(`
+      <div class="modal-header"><h3>${Svg.video} 新建视频</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="form-group"><label>视频标题/主题</label><input id="modal_content_title" placeholder="例如：夏日狗狗清凉餐"></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1"><label>计划日期</label><input type="date" id="modal_content_date" value="${todayStr()}"></div>
+      <div class="form-group narrow" style="max-width:120px"><label>状态</label>
+        <select id="modal_content_status">
+          <option value="selecting">选题中</option>
+          <option value="editing">剪辑中</option>
+          <option value="published">已发布</option>
+        </select>
+      </div>
+    </div>
+      <div class="form-group"><label>关联灵感（可选）</label>${renderIdeaSelector([], 'ideaSelectContent')}</div>
+      <div class="form-group"><label>用到的食材（可选）</label>${renderInvSelector([], 'invSelectContent')}</div>
+      <div class="form-group"><label>备注</label><textarea id="modal_content_note" placeholder="脚本链接、注意事项..."></textarea></div>
+      <button class="btn btn-full" onclick="saveContent()">保存</button>
+    `);
+  } else if (type === 'pr') {
+    openModal(`
+      <div class="modal-header"><h3>${Svg.people} 记合作</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="form-group"><label>品牌名称</label><input id="modal_pr_brand" placeholder="例如：XX宠物食品"></div>
+      <div class="form-group"><label>合作产品/内容</label><input id="modal_pr_product" placeholder="例如：狗粮测评/专属配餐"></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1"><label>收到日期</label><input type="date" id="modal_pr_date" value="${todayStr()}"></div>
+      <div class="form-group" style="flex:1"><label>回复截止</label><input type="date" id="modal_pr_deadline"></div>
+    </div>
+      <div class="form-group"><label>报价/费用</label><input id="modal_pr_fee" placeholder="例如：3000元"></div>
+      <div class="form-group"><label>状态</label>
+        <select id="modal_pr_status">
+          <option value="pending">待回复</option>
+          <option value="accepted">已接受</option>
+          <option value="rejected">已婉拒</option>
+        </select>
+      </div>
+      <div class="form-group"><label>备注</label><textarea id="modal_pr_note" placeholder="合作要求、对接人联系方式..."></textarea></div>
+      <button class="btn btn-full" onclick="savePR()">保存</button>
+    `);
+  } else if (type === 'inventory') {
+    const usedCats = getUsedCategories();
+    openModal(`
+      <div class="modal-header"><h3>${Svg.basket} 记食材</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+      <div class="form-group"><label>食材名称</label><input id="modal_inv_name" placeholder="例如：鸡胸肉"></div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label>分类（可自定义）</label>
+          <input id="modal_inv_category" placeholder="例如：肉类" list="catDatalist" value="">
+          <datalist id="catDatalist">${usedCats.map(c => `<option value="${c}">`).join('')}</datalist>
+          ${usedCats.length > 0 ? `<div class="cat-chips">${usedCats.map(c => `<span class="cat-chip" onclick="document.getElementById('modal_inv_category').value='${c}'">${c}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>数量/重量</label>
+          <input type="number" id="modal_inv_amount" placeholder="1" step="0.1" min="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label>单位</label>
+          <select id="modal_inv_unit">
+            <option value="">请选择</option>
+            <option value="kg">kg</option>
+            <option value="袋">袋</option>
+            <option value="个">个</option>
+            <option value="包">包</option>
+            <option value="盒">盒</option>
+            <option value="罐">罐</option>
+            <option value="瓶">瓶</option>
+            <option value="斤">斤</option>
+            <option value="g">g</option>
+            <option value="L">L</option>
+            <option value="ml">ml</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>入库时间</label>
+          <input type="date" id="modal_inv_stockDate" value="${todayStr()}">
+        </div>
+      </div>
+      <div class="form-group"><label>过期时间</label><input type="date" id="modal_inv_expiry"></div>
+      <div class="form-group"><label>备注</label><input id="modal_inv_note" placeholder="存放位置等"></div>
+      <button class="btn btn-full" onclick="saveInventory()">保存</button>
+    `);
+  }
+}
+
+function setIdeaType(type, el) {
+  tempIdeaType = type;
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== Save =====
+function saveIdea() {
+  const text = document.getElementById('modal_idea_text').value.trim();
+  if (!text) { showToast('请输入灵感内容'); return; }
+  const type = tempIdeaType;
+  const rating = tempStarRating;
+  const relatedInv = getSelectedInvIds('invSelectIdea');
+  const ideas = DB.get('ideas');
+  if (editingId) { const item = ideas.find(i => i.id === editingId); if (item) { item.text = text; item.type = type; item.rating = rating; item.relatedInv = relatedInv; } }
+  else { ideas.push({ id: uid(), text, type, rating, relatedInv, createdAt: new Date().toISOString() }); }
+  DB.set('ideas', ideas);
+  closeModal(); renderIdeas(); showToast('灵感已保存');
+}
+
+function saveContent() {
+  const title = document.getElementById('modal_content_title').value.trim();
+  if (!title) { showToast('请输入标题'); return; }
+  const date = document.getElementById('modal_content_date').value;
+  const status = document.getElementById('modal_content_status').value;
+  const note = document.getElementById('modal_content_note').value.trim();
+  const relatedInv = getSelectedInvIds('invSelectContent');
+  const relatedIdeas = getSelectedInvIds('ideaSelectContent');
+  const contents = DB.get('content');
+  if (editingId) { const item = contents.find(c => c.id === editingId); if (item) { Object.assign(item, { title, date, status, note, relatedInv, relatedIdeas }); } }
+  else { contents.push({ id: uid(), title, date, status, note, relatedInv, relatedIdeas }); }
+  DB.set('content', contents);
+  closeModal(); renderCalendar(); showToast('视频计划已保存');
+}
+
+function savePR() {
+  const brand = document.getElementById('modal_pr_brand').value.trim();
+  if (!brand) { showToast('请输入品牌名称'); return; }
+  const data = {
+    brand,
+    product: document.getElementById('modal_pr_product').value.trim(),
+    date: document.getElementById('modal_pr_date').value,
+    deadline: document.getElementById('modal_pr_deadline').value,
+    fee: document.getElementById('modal_pr_fee').value.trim(),
+    status: document.getElementById('modal_pr_status').value,
+    note: document.getElementById('modal_pr_note').value.trim()
+  };
+  const prs = DB.get('pr');
+  if (editingId) { const item = prs.find(p => p.id === editingId); if (item) { Object.assign(item, data); } }
+  else { prs.push({ id: uid(), ...data }); }
+  DB.set('pr', prs);
+  closeModal(); renderPR(); showToast('合作已保存');
+}
+
+function saveInventory() {
+  const name = document.getElementById('modal_inv_name').value.trim();
+  if (!name) { showToast('请输入食材名称'); return; }
+  const data = {
+    name,
+    category: document.getElementById('modal_inv_category').value.trim() || '未分类',
+    amount: parseFloat(document.getElementById('modal_inv_amount').value) || 0,
+    unit: document.getElementById('modal_inv_unit').value.trim(),
+    stockDate: document.getElementById('modal_inv_stockDate').value,
+    expiry: document.getElementById('modal_inv_expiry').value,
+    note: document.getElementById('modal_inv_note').value.trim()
+  };
+  const inv = DB.get('inventory');
+  if (editingId) { const item = inv.find(i => i.id === editingId); if (item) { Object.assign(item, data); } }
+  else { inv.push({ id: uid(), ...data }); }
+  DB.set('inventory', inv);
+  closeModal(); renderInventory(); showToast('库存已保存');
+}
+
+// ===== Edit =====
+function editIdea(id) {
+  const item = DB.get('ideas').find(i => i.id === id); if (!item) return;
+  editingId = id;
+  tempStarRating = item.rating || 0;
+  tempIdeaType = item.type || '选材创意';
+  const typeActive = tempIdeaType === '选材创意' ? [0,1] : [1,0];
+  openModal(`
+    <div class="modal-header"><h3>${Svg.edit} 编辑灵感</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-group">
+      <label>类型</label>
+      <div class="type-chips">
+        <div class="type-chip ${typeActive[0]?'active':''}" onclick="setIdeaType('选材创意', this)">选材创意</div>
+        <div class="type-chip ${typeActive[1]?'active':''}" onclick="setIdeaType('拍摄/剪辑创意', this)">拍摄/剪辑创意</div>
+      </div>
+    </div>
+    <div class="form-group"><label>内容</label><textarea id="modal_idea_text" style="min-height:100px">${escapeHtml(item.text)}</textarea></div>
+    <div class="form-group"><label>重要程度</label>${renderStarInput(tempStarRating, 'starInput')}</div>
+    <div class="form-group"><label>相关食材</label>${renderInvSelector(item.relatedInv||[], 'invSelectIdea')}</div>
+    <button class="btn btn-full" onclick="saveIdea()">保存修改</button>
+    <button class="btn btn-full btn-danger mt-2" onclick="deleteIdea('${id}')">删除</button>
+  `);
+}
+function deleteIdea(id) { if (!confirm('删除这条灵感？')) return; DB.set('ideas', DB.get('ideas').filter(i => i.id !== id)); closeModal(); renderIdeas(); }
+
+function editContent(id) {
+  const item = DB.get('content').find(c => c.id === id); if (!item) return;
+  editingId = id;
+  openModal(`
+    <div class="modal-header"><h3>${Svg.edit} 编辑视频</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-group"><label>标题</label><input id="modal_content_title" value="${escapeHtml(item.title)}"></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1"><label>日期</label><input type="date" id="modal_content_date" value="${item.date||''}"></div>
+      <div class="form-group narrow" style="max-width:120px"><label>状态</label>
+        <select id="modal_content_status">
+          <option value="selecting" ${item.status==='selecting'?'selected':''}>选题中</option>
+          <option value="editing" ${item.status==='editing'?'selected':''}>剪辑中</option>
+          <option value="published" ${item.status==='published'?'selected':''}>已发布</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>关联灵感</label>${renderIdeaSelector(item.relatedIdeas||[], 'ideaSelectContent')}</div>
+    <div class="form-group"><label>用到的食材</label>${renderInvSelector(item.relatedInv||[], 'invSelectContent')}</div>
+    <div class="form-group"><label>备注</label><textarea id="modal_content_note">${escapeHtml(item.note||'')}</textarea></div>
+    <button class="btn btn-full" onclick="saveContent()">保存修改</button>
+    <button class="btn btn-full btn-danger mt-2" onclick="deleteContent('${id}')">删除</button>
+  `);
+}
+function deleteContent(id) { if (!confirm('删除这条内容？')) return; DB.set('content', DB.get('content').filter(c => c.id !== id)); closeModal(); renderCalendar(); }
+
+function editPR(id) {
+  const item = DB.get('pr').find(p => p.id === id); if (!item) return;
+  editingId = id;
+  openModal(`
+    <div class="modal-header"><h3>${Svg.edit} 编辑合作</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-group"><label>品牌</label><input id="modal_pr_brand" value="${escapeHtml(item.brand)}"></div>
+    <div class="form-group"><label>产品/内容</label><input id="modal_pr_product" value="${escapeHtml(item.product||'')}"></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1"><label>收到日期</label><input type="date" id="modal_pr_date" value="${item.date||''}"></div>
+      <div class="form-group" style="flex:1"><label>截止</label><input type="date" id="modal_pr_deadline" value="${item.deadline||''}"></div>
+    </div>
+    <div class="form-group"><label>报价</label><input id="modal_pr_fee" value="${escapeHtml(item.fee||'')}"></div>
+    <div class="form-group"><label>状态</label>
+      <select id="modal_pr_status">
+        <option value="pending" ${item.status==='pending'?'selected':''}>待回复</option>
+        <option value="accepted" ${item.status==='accepted'?'selected':''}>已接受</option>
+        <option value="rejected" ${item.status==='rejected'?'selected':''}>已婉拒</option>
+      </select>
+    </div>
+    <div class="form-group"><label>备注</label><textarea id="modal_pr_note">${escapeHtml(item.note||'')}</textarea></div>
+    <button class="btn btn-full" onclick="savePR()">保存修改</button>
+    <button class="btn btn-full btn-danger mt-2" onclick="deletePR('${id}')">删除</button>
+  `);
+}
+function deletePR(id) { if (!confirm('删除这条记录？')) return; DB.set('pr', DB.get('pr').filter(p => p.id !== id)); closeModal(); renderPR(); }
+
+function editInventory(id) {
+  const item = DB.get('inventory').find(i => i.id === id); if (!item) return;
+  editingId = id;
+  const usedCats = getUsedCategories();
+  const unitOptions = ['kg','袋','个','包','盒','罐','瓶','斤','g','L','ml'];
+  openModal(`
+    <div class="modal-header"><h3>${Svg.edit} 编辑库存</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-group"><label>名称</label><input id="modal_inv_name" value="${escapeHtml(item.name)}"></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label>分类</label>
+        <input id="modal_inv_category" value="${escapeHtml(item.category||'')}" placeholder="自定义分类" list="catDatalist">
+        <datalist id="catDatalist">${usedCats.map(c => `<option value="${c}">`).join('')}</datalist>
+        ${usedCats.length > 0 ? `<div class="cat-chips">${usedCats.map(c => `<span class="cat-chip" onclick="document.getElementById('modal_inv_category').value='${c}'">${c}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>数量/重量</label>
+        <input type="number" id="modal_inv_amount" value="${item.amount||''}" step="0.1" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label>单位</label>
+        <select id="modal_inv_unit">
+          <option value="">请选择</option>
+          ${unitOptions.map(u => `<option value="${u}" ${item.unit===u?'selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>入库时间</label>
+        <input type="date" id="modal_inv_stockDate" value="${item.stockDate||todayStr()}">
+      </div>
+    </div>
+    <div class="form-group"><label>过期时间</label><input type="date" id="modal_inv_expiry" value="${item.expiry||''}"></div>
+    <div class="form-group"><label>备注</label><input id="modal_inv_note" value="${escapeHtml(item.note||'')}"></div>
+    <button class="btn btn-full" onclick="saveInventory()">保存修改</button>
+    <button class="btn btn-full btn-danger mt-2" onclick="deleteInventory('${id}')">删除</button>
+  `);
+}
+function deleteInventory(id) { if (!confirm('删除这条库存？')) return; DB.set('inventory', DB.get('inventory').filter(i => i.id !== id)); closeModal(); renderInventory(); }
+
+// ===== Modal =====
+function openModal(html) { document.getElementById('modalContent').innerHTML = html; document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); editingId = null; }
+document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal(); });
+
+// ===== Utils =====
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+// ===== Init =====
+function updateDateTime() {
+  const d = new Date();
+  document.getElementById('greetingText').textContent = getGreeting();
+  document.getElementById('dateText').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+// Migrate old data
+function migrateData() {
+  const contents = DB.get('content');
+  let changed = false;
+  contents.forEach(c => {
+    if (c.status === 'planned') { c.status = 'selecting'; changed = true; }
+    if (c.status === 'filming') { c.status = 'editing'; changed = true; }
+    if (c.status === 'draft') { c.status = 'editing'; changed = true; }
+  });
+  if (changed) DB.set('content', contents);
+
+  const ideas = DB.get('ideas');
+  let ideaChanged = false;
+  ideas.forEach(i => {
+    if (!i.type) {
+      if (i.tag === '选题' || i.tag === '脚本') i.type = '选材创意';
+      else if (i.tag === '拍摄' || i.tag === '运营') i.type = '拍摄/剪辑创意';
+      else i.type = '选材创意';
+      ideaChanged = true;
+    }
+    if (i.rating === undefined) { i.rating = 0; ideaChanged = true; }
+    if (!i.relatedInv) { i.relatedInv = []; ideaChanged = true; }
+  });
+  if (ideaChanged) DB.set('ideas', ideas);
+}
+
+loadTheme();
+injectIcons();
+migrateData();
+updateDateTime();
+switchView('home');
+
+// PWA
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+  setTimeout(() => document.getElementById('installBanner').classList.remove('show'), 10000);
+});
+window.addEventListener('appinstalled', () => { document.getElementById('installBanner').classList.remove('show'); showToast('已安装到桌面'); });
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js?v=12').then(reg => {
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    reg.addEventListener('updatefound', () => {
+      const nw = reg.installing;
+      nw.addEventListener('statechange', () => {
+        if (nw.state === 'installed' && navigator.serviceWorker.controller) nw.postMessage({ type: 'SKIP_WAITING' });
+      });
+    });
+  }).catch(()=>{});
+  navigator.serviceWorker.addEventListener('message', (e) => { if (e.data && e.data.type === 'SW_UPDATED') window.location.reload(); });
+}
+</script>
+</body>
+</html>
