@@ -1,7 +1,7 @@
-const CACHE_NAME = 'lulu-workspace-v12';
+const CACHE_NAME = 'lulu-workspace-v13';
 const ASSETS = [
   './',
-  './index.html?v=12',
+  './index.html?v=13',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
