@@ -541,13 +541,13 @@
   <div class="sub-header" style="display:flex;align-items:center">
     <div>
       <div class="sub-title">脚本创作</div>
-      <div class="sub-meta">写视频脚本 · AI 辅助起草</div>
+      <div class="sub-meta">写视频脚本 · 免费草稿</div>
     </div>
     <span class="topbar-icon" id="scriptGearIcon" style="margin-left:auto;cursor:pointer" onclick="openAISettings()" title="AI 设置"></span>
   </div>
   <div class="card" style="padding:12px">
     <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
-      在这里写独立脚本，可关联灵感与食材；点「AI 生成草稿」会根据它们自动起草一份口播脚本。换手机前记得用右上角备份功能导出数据。
+      在这里写独立脚本，可关联灵感与食材；点「生成草稿（免费）」会根据它们自动起草一份口播脚本，完全离线、不用花一分钱。换手机前记得用右上角备份功能导出数据。
     </div>
     <div id="scriptList"></div>
   </div>
@@ -1166,6 +1166,7 @@ function quickAdd(type) {
       <button class="btn btn-full" onclick="saveIdea()">保存灵感</button>
     `);
   } else if (type === 'content') {
+    const hasKey = !!DB.get('ai', {}).apiKey;
     openModal(`
       <div class="modal-header"><h3>${Svg.video} 新建视频</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
       <div class="form-group"><label>视频标题/主题</label><input id="modal_content_title" placeholder="例如：夏日狗狗清凉餐"></div>
@@ -1182,10 +1183,12 @@ function quickAdd(type) {
       <div class="form-group"><label>关联灵感（可选）</label>${renderIdeaSelector([], 'ideaSelectContent')}</div>
       <div class="form-group"><label>用到的食材（可选）</label>${renderInvSelector([], 'invSelectContent')}</div>
       <div class="form-group">
-        <label style="display:flex;align-items:center;justify-content:space-between">脚本（可选）
-          <button class="btn btn-sm" id="modal_content_script_ai" type="button" onclick="aiGenContentScript()">AI 生成草稿</button>
-        </label>
-        <textarea id="modal_content_script" style="min-height:130px" placeholder="在这写视频脚本，或点「AI 生成草稿」自动起草"></textarea>
+        <label>脚本（可选）</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" type="button" onclick="genScriptDraft('modal_content_script', scriptCtxFromContent())">生成草稿（免费）</button>
+          ${hasKey ? `<button class="btn btn-sm btn-ghost" type="button" onclick="aiGenContentScript()">AI 生成</button>` : ''}
+        </div>
+        <textarea id="modal_content_script" style="min-height:130px" placeholder="点「生成草稿」按灵感和食材自动起草，或直接手写"></textarea>
       </div>
       <div class="form-group"><label>备注</label><textarea id="modal_content_note" placeholder="脚本链接、注意事项..."></textarea></div>
       <button class="btn btn-full" onclick="saveContent()">保存</button>
@@ -1359,6 +1362,7 @@ function deleteIdea(id) { if (!confirm('删除这条灵感？')) return; DB.set(
 function editContent(id) {
   const item = DB.get('content').find(c => c.id === id); if (!item) return;
   editingId = id;
+  const hasKey = !!DB.get('ai', {}).apiKey;
   openModal(`
     <div class="modal-header"><h3>${Svg.edit} 编辑视频</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-group"><label>标题</label><input id="modal_content_title" value="${escapeHtml(item.title)}"></div>
@@ -1375,10 +1379,12 @@ function editContent(id) {
     <div class="form-group"><label>关联灵感</label>${renderIdeaSelector(item.relatedIdeas||[], 'ideaSelectContent')}</div>
     <div class="form-group"><label>用到的食材</label>${renderInvSelector(item.relatedInv||[], 'invSelectContent')}</div>
     <div class="form-group">
-      <label style="display:flex;align-items:center;justify-content:space-between">脚本
-        <button class="btn btn-sm" id="modal_content_script_ai" type="button" onclick="aiGenContentScript()">AI 生成草稿</button>
-      </label>
-      <textarea id="modal_content_script" style="min-height:130px" placeholder="在这写视频脚本，或点「AI 生成草稿」自动起草">${escapeHtml(item.script||'')}</textarea>
+      <label>脚本</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" type="button" onclick="genScriptDraft('modal_content_script', scriptCtxFromContent())">生成草稿（免费）</button>
+        ${hasKey ? `<button class="btn btn-sm btn-ghost" type="button" onclick="aiGenContentScript()">AI 生成</button>` : ''}
+      </div>
+      <textarea id="modal_content_script" style="min-height:130px" placeholder="点「生成草稿」按灵感和食材自动起草，或直接手写">${escapeHtml(item.script||'')}</textarea>
     </div>
     <div class="form-group"><label>备注</label><textarea id="modal_content_note">${escapeHtml(item.note||'')}</textarea></div>
     <button class="btn btn-full" onclick="saveContent()">保存修改</button>
@@ -1575,7 +1581,7 @@ async function aiGenScript(textareaId, ctx) {
     openAIFallback(buildScriptUser(ctx));
   } finally { if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; } }
 }
-function aiGenContentScript() {
+function scriptCtxFromContent() {
   const title = document.getElementById('modal_content_title').value.trim();
   const note = document.getElementById('modal_content_note').value.trim();
   const ideaIds = getSelectedInvIds('ideaSelectContent');
@@ -1583,16 +1589,45 @@ function aiGenContentScript() {
   const ideas = DB.get('ideas').filter(i => ideaIds.includes(i.id)).map(i => i.text);
   const invAll = DB.get('inventory').concat(DB.get('shopping'));
   const inv = invAll.filter(x => invIds.includes(x.id)).map(x => x.name + ' ' + (x.amount || x.qty || '') + (x.unit || ''));
-  aiGenScript('modal_content_script', { title, note, ideas, inv });
+  return { title, note, ideas, inv };
 }
-function aiGenStandaloneScript() {
+function scriptCtxFromScript() {
   const title = document.getElementById('modal_script_title').value.trim();
   const ideaIds = getSelectedInvIds('ideaSelectScript');
   const invIds = getSelectedInvIds('invSelectScript');
   const ideas = DB.get('ideas').filter(i => ideaIds.includes(i.id)).map(i => i.text);
   const invAll = DB.get('inventory').concat(DB.get('shopping'));
   const inv = invAll.filter(x => invIds.includes(x.id)).map(x => x.name + ' ' + (x.amount || x.qty || '') + (x.unit || ''));
-  aiGenScript('modal_script_content', { title, note: '', ideas, inv });
+  return { title, note: '', ideas, inv };
+}
+function aiGenContentScript() { aiGenScript('modal_content_script', scriptCtxFromContent()); }
+function aiGenStandaloneScript() { aiGenScript('modal_script_content', scriptCtxFromScript()); }
+function buildScriptDraft(ctx) {
+  const title = ctx.title || '狗狗配餐';
+  const ideas = ctx.ideas && ctx.ideas.length ? ctx.ideas : [];
+  const inv = ctx.inv && ctx.inv.length ? ctx.inv : [];
+  const invText = inv.length ? inv.join('、') : '（在「用到的食材」里选，或在此手写：鸡胸肉、南瓜、胡萝卜）';
+  const ideaLine = ideas.length ? ideas.join('；') : '（可写：低脂高蛋白 / 肠胃友好 / 夏日清爽 等）';
+  const cn = ['一','二','三','四','五','六','七','八','九','十'];
+  const steps = inv.length
+    ? inv.map((x, i) => '第' + (cn[i] || (i + 1)) + '步，处理' + x + '（洗净、煮熟、去骨，按狗狗体型控制分量）').join('；\n')
+    : '第①步，食材洗净煮熟、切成适合狗狗的小块；\n第②步，按比例混合拌匀；\n第③步，分装冷藏或冷冻，随吃随取。';
+  return '【开场·画面】特写狗狗期待的眼神，配轻快 BGM\n' +
+    '【开场·口播】今天给' + title + '做一道超简单的狗狗配餐，营养又好做，新手也能搞定！\n\n' +
+    '【灵感/卖点·口播】这道餐的灵感是：' + ideaLine + '\n\n' +
+    '【食材展示·画面】把食材一字排开做特写\n' +
+    '【食材展示·口播】需要准备：' + invText + '。都挑新鲜的，注意狗狗忌口——葱、蒜、巧克力、葡萄、洋葱绝对不能给。\n\n' +
+    '【制作·画面】分步操作近景\n' +
+    '【制作·口播】' + steps + '\n\n' +
+    '【试吃·画面】狗狗试吃满足表情 + 字幕\n' +
+    '【试吃·口播】看它吃得香不香！每周换着花样，狗狗营养更均衡。\n\n' +
+    '【结尾·口播】学会了记得点赞、收藏、关注我，每天一道狗狗爱心餐～有想看的食材评论区告诉我！';
+}
+function genScriptDraft(textareaId, ctx) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+  ta.value = buildScriptDraft(ctx);
+  showToast('已生成免费草稿，可直接修改');
 }
 function renderScripts() {
   const scripts = DB.get('scripts');
@@ -1611,6 +1646,7 @@ function openScriptModal(id) {
   let item = null;
   if (id) item = DB.get('scripts').find(s => s.id === id);
   editingId = id || null;
+  const hasKey = !!DB.get('ai', {}).apiKey;
   openModal(`
     <div class="modal-header"><h3>${Svg.script} ${id ? '编辑脚本' : '新建脚本'}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-group"><label>脚本标题</label><input id="modal_script_title" value="${item ? escapeHtml(item.title) : ''}" placeholder="如：鸡肉南瓜泥 第3期"></div>
@@ -1619,10 +1655,12 @@ function openScriptModal(id) {
       <div class="form-group"><label>用到的食材</label>${renderInvSelector(item ? (item.relatedInv || []) : [], 'invSelectScript')}</div>
     </div>
     <div class="form-group">
-      <label style="display:flex;align-items:center;justify-content:space-between">脚本内容
-        <button class="btn btn-sm" id="modal_script_content_ai" type="button" onclick="aiGenStandaloneScript()">AI 生成草稿</button>
-      </label>
-      <textarea id="modal_script_content" style="min-height:220px" placeholder="在此写脚本，或点「AI 生成草稿」自动起草">${item ? escapeHtml(item.content || '') : ''}</textarea>
+      <label>脚本内容</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" type="button" onclick="genScriptDraft('modal_script_content', scriptCtxFromScript())">生成草稿（免费）</button>
+        ${hasKey ? `<button class="btn btn-sm btn-ghost" type="button" onclick="aiGenStandaloneScript()">AI 生成</button>` : ''}
+      </div>
+      <textarea id="modal_script_content" style="min-height:220px" placeholder="点「生成草稿」按灵感和食材自动起草，或直接手写">${item ? escapeHtml(item.content || '') : ''}</textarea>
     </div>
     <button class="btn btn-full" onclick="saveScript()">${id ? '保存修改' : '创建脚本'}</button>
     ${id ? `<button class="btn btn-full btn-danger mt-2" onclick="deleteScript('${id}')">删除</button>` : ''}
@@ -1650,8 +1688,9 @@ function openAISettings() {
   openModal(`
     <div class="modal-header"><h3>${Svg.gear} AI 设置</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
-      密钥仅保存在你手机本地，不会上传到任何服务器；生成时由你的手机直接调用 AI 接口。<br>
-      推荐用 DeepSeek（便宜、中文好）：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--primary-dark)">platform.deepseek.com</a> 获取密钥。
+      不填密钥也能用：脚本框的「生成草稿（免费）」会自动按灵感和食材起草，完全离线、零花费。<br>
+      只有想用 AI 帮你写得更生动时才需要填密钥（可选）。密钥仅存在你手机本地，不上传任何服务器。<br>
+      推荐 DeepSeek（便宜、中文好）：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--primary-dark)">platform.deepseek.com</a> 获取密钥。
     </div>
     <div class="form-group"><label>服务商</label>
       <select id="ai_provider" onchange="onAiProviderChange(this)">
