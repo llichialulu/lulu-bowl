@@ -536,6 +536,23 @@
   </div>
 </div>
 
+<!-- ===== Script (脚本) ===== -->
+<div class="view" id="view-script">
+  <div class="sub-header" style="display:flex;align-items:center">
+    <div>
+      <div class="sub-title">脚本创作</div>
+      <div class="sub-meta">写视频脚本 · AI 辅助起草</div>
+    </div>
+    <span class="topbar-icon" id="scriptGearIcon" style="margin-left:auto;cursor:pointer" onclick="openAISettings()" title="AI 设置"></span>
+  </div>
+  <div class="card" style="padding:12px">
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
+      在这里写独立脚本，可关联灵感与食材；点「AI 生成草稿」会根据它们自动起草一份口播脚本。换手机前记得用右上角备份功能导出数据。
+    </div>
+    <div id="scriptList"></div>
+  </div>
+</div>
+
 <button class="fab" id="fab" onclick="fabAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -552,6 +569,9 @@
   </div>
   <div class="nav-item" data-view="calendar" onclick="switchView('calendar')">
     <span class="icon" id="navCalIcon"></span><span class="label">排期</span>
+  </div>
+  <div class="nav-item" data-view="script" onclick="switchView('script')">
+    <span class="icon" id="navScriptIcon"></span><span class="label">脚本</span>
   </div>
   <div class="nav-item" data-view="inventory" onclick="switchView('inventory')">
     <span class="icon" id="navInvIcon"></span><span class="label">库存</span>
@@ -586,7 +606,10 @@ const Svg = {
   star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   starOutline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
-  cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>'
+  cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>',
+  script: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z"/><path d="M19 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/></svg>'
 };
 
 const IconMap = {
@@ -599,7 +622,9 @@ const IconMap = {
   'navCalIcon': Svg.calendar,
   'navPrIcon': Svg.people,
   'navIdeaIcon': Svg.lightbulb,
-  'navInvIcon': Svg.box
+  'navInvIcon': Svg.box,
+  'navScriptIcon': Svg.script,
+  'scriptGearIcon': Svg.gear
 };
 function injectIcons() {
   for (const [id, svg] of Object.entries(IconMap)) {
@@ -799,6 +824,7 @@ function switchView(view) {
   if (view === 'calendar') renderCalendar();
   if (view === 'pr') renderPR();
   if (view === 'ideas') renderIdeas();
+  if (view === 'script') renderScripts();
   updateFab();
 }
 
@@ -810,7 +836,8 @@ function updateFab() {
     pr: () => quickAdd('pr'),
     ideas: () => { document.getElementById('quickIdeaInput').focus(); },
     inventory: () => quickAdd('inventory'),
-    shopping: () => { document.getElementById('quickShoppingInput').focus(); }
+    shopping: () => { document.getElementById('quickShoppingInput').focus(); },
+    script: () => openScriptModal()
   };
   fab.style.display = actions[currentView] ? 'flex' : 'none';
 }
@@ -821,7 +848,8 @@ function fabAction() {
     pr: () => quickAdd('pr'),
     ideas: () => { document.getElementById('quickIdeaInput').focus(); },
     inventory: () => quickAdd('inventory'),
-    shopping: () => { document.getElementById('quickShoppingInput').focus(); }
+    shopping: () => { document.getElementById('quickShoppingInput').focus(); },
+    script: () => openScriptModal()
   };
   if (actions[currentView]) actions[currentView]();
 }
@@ -1153,6 +1181,12 @@ function quickAdd(type) {
     </div>
       <div class="form-group"><label>关联灵感（可选）</label>${renderIdeaSelector([], 'ideaSelectContent')}</div>
       <div class="form-group"><label>用到的食材（可选）</label>${renderInvSelector([], 'invSelectContent')}</div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;justify-content:space-between">脚本（可选）
+          <button class="btn btn-sm" id="modal_content_script_ai" type="button" onclick="aiGenContentScript()">AI 生成草稿</button>
+        </label>
+        <textarea id="modal_content_script" style="min-height:130px" placeholder="在这写视频脚本，或点「AI 生成草稿」自动起草"></textarea>
+      </div>
       <div class="form-group"><label>备注</label><textarea id="modal_content_note" placeholder="脚本链接、注意事项..."></textarea></div>
       <button class="btn btn-full" onclick="saveContent()">保存</button>
     `);
@@ -1249,11 +1283,12 @@ function saveContent() {
   const date = document.getElementById('modal_content_date').value;
   const status = document.getElementById('modal_content_status').value;
   const note = document.getElementById('modal_content_note').value.trim();
+  const script = document.getElementById('modal_content_script').value;
   const relatedInv = getSelectedInvIds('invSelectContent');
   const relatedIdeas = getSelectedInvIds('ideaSelectContent');
   const contents = DB.get('content');
-  if (editingId) { const item = contents.find(c => c.id === editingId); if (item) { Object.assign(item, { title, date, status, note, relatedInv, relatedIdeas }); } }
-  else { contents.push({ id: uid(), title, date, status, note, relatedInv, relatedIdeas }); }
+  if (editingId) { const item = contents.find(c => c.id === editingId); if (item) { Object.assign(item, { title, date, status, note, script, relatedInv, relatedIdeas }); } }
+  else { contents.push({ id: uid(), title, date, status, note, script, relatedInv, relatedIdeas }); }
   DB.set('content', contents);
   closeModal(); renderCalendar(); showToast('视频计划已保存');
 }
@@ -1339,6 +1374,12 @@ function editContent(id) {
     </div>
     <div class="form-group"><label>关联灵感</label>${renderIdeaSelector(item.relatedIdeas||[], 'ideaSelectContent')}</div>
     <div class="form-group"><label>用到的食材</label>${renderInvSelector(item.relatedInv||[], 'invSelectContent')}</div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;justify-content:space-between">脚本
+        <button class="btn btn-sm" id="modal_content_script_ai" type="button" onclick="aiGenContentScript()">AI 生成草稿</button>
+      </label>
+      <textarea id="modal_content_script" style="min-height:130px" placeholder="在这写视频脚本，或点「AI 生成草稿」自动起草">${escapeHtml(item.script||'')}</textarea>
+    </div>
     <div class="form-group"><label>备注</label><textarea id="modal_content_note">${escapeHtml(item.note||'')}</textarea></div>
     <button class="btn btn-full" onclick="saveContent()">保存修改</button>
     <button class="btn btn-full btn-danger mt-2" onclick="deleteContent('${id}')">删除</button>
@@ -1429,7 +1470,7 @@ function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&a
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 
 // ===== Data Backup (导出 / 导入) =====
-const BACKUP_KEYS = ['content','pr','ideas','inventory','shopping','theme'];
+const BACKUP_KEYS = ['content','pr','ideas','inventory','shopping','scripts','ai','theme'];
 function openBackupModal() {
   const html = `
     <div class="modal-header">数据备份</div>
@@ -1485,6 +1526,182 @@ function importData(file) {
   reader.readAsText(file);
 }
 
+// ===== Script (脚本) =====
+const SCRIPT_SYSTEM = '你是一位经验丰富的萌宠美食短视频编剧，擅长撰写「给狗狗做配餐 / 狗狗做饭」类短视频口播脚本。要求：\n' +
+  '- 亲切、口语化、有画面感，适合 1-3 分钟竖屏短视频；\n' +
+  '- 结构清晰：吸睛开场（抛出痛点或这道餐的好处）→ 食材展示（列出用料）→ 制作步骤（分步讲解、提示安全与忌口）→ 试吃/互动结尾（引导点赞、收藏、关注）；\n' +
+  '- 用简体中文输出，采用分镜式段落，每段用【画面】和【口播】标注；\n' +
+  '- 可适当补充营养价值、保存方式、适合什么狗狗等实用信息。';
+function buildScriptUser(ctx) {
+  return '请基于以下信息，写一份完整的狗狗配餐短视频脚本：\n' +
+    '【主题/标题】' + (ctx.title || '未命名') + '\n' +
+    '【备注】' + (ctx.note || '无') + '\n' +
+    '【相关灵感】' + (ctx.ideas && ctx.ideas.length ? ctx.ideas.join('；') : '无') + '\n' +
+    '【用到的食材】' + (ctx.inv && ctx.inv.length ? ctx.inv.join('、') : '无') + '\n' +
+    '请直接输出脚本正文。';
+}
+async function callAI(system, user) {
+  const ai = DB.get('ai', {});
+  if (!ai.apiKey) { openAISettings(); throw new Error('no-key'); }
+  let base = (ai.baseUrl || 'https://api.deepseek.com/v1').trim().replace(/\/+$/, '');
+  const model = ai.model || 'deepseek-chat';
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  try {
+    const resp = await fetch(base + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ai.apiKey },
+      body: JSON.stringify({ model, messages: [ { role: 'system', content: system }, { role: 'user', content: user } ], temperature: 0.85 }),
+      signal: controller.signal
+    });
+    if (!resp.ok) { const t = await resp.text().catch(() => ''); throw new Error('API ' + resp.status + ' ' + t.slice(0, 140)); }
+    const json = await resp.json();
+    return (json.choices && json.choices[0] && json.choices[0].message.content) || '';
+  } finally { clearTimeout(timer); }
+}
+async function aiGenScript(textareaId, ctx) {
+  const ai = DB.get('ai', {});
+  if (!ai.apiKey) { openAISettings(); showToast('请先在「AI 设置」里填写密钥'); return; }
+  const btn = document.getElementById(textareaId + '_ai');
+  const oldHtml = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '生成中…'; }
+  try {
+    const out = await callAI(SCRIPT_SYSTEM, buildScriptUser(ctx));
+    const ta = document.getElementById(textareaId);
+    if (ta) ta.value = out;
+    showToast('AI 草稿已生成，可继续修改');
+  } catch (e) {
+    if (e.message === 'no-key') return;
+    openAIFallback(buildScriptUser(ctx));
+  } finally { if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; } }
+}
+function aiGenContentScript() {
+  const title = document.getElementById('modal_content_title').value.trim();
+  const note = document.getElementById('modal_content_note').value.trim();
+  const ideaIds = getSelectedInvIds('ideaSelectContent');
+  const invIds = getSelectedInvIds('invSelectContent');
+  const ideas = DB.get('ideas').filter(i => ideaIds.includes(i.id)).map(i => i.text);
+  const invAll = DB.get('inventory').concat(DB.get('shopping'));
+  const inv = invAll.filter(x => invIds.includes(x.id)).map(x => x.name + ' ' + (x.amount || x.qty || '') + (x.unit || ''));
+  aiGenScript('modal_content_script', { title, note, ideas, inv });
+}
+function aiGenStandaloneScript() {
+  const title = document.getElementById('modal_script_title').value.trim();
+  const ideaIds = getSelectedInvIds('ideaSelectScript');
+  const invIds = getSelectedInvIds('invSelectScript');
+  const ideas = DB.get('ideas').filter(i => ideaIds.includes(i.id)).map(i => i.text);
+  const invAll = DB.get('inventory').concat(DB.get('shopping'));
+  const inv = invAll.filter(x => invIds.includes(x.id)).map(x => x.name + ' ' + (x.amount || x.qty || '') + (x.unit || ''));
+  aiGenScript('modal_script_content', { title, note: '', ideas, inv });
+}
+function renderScripts() {
+  const scripts = DB.get('scripts');
+  const el = document.getElementById('scriptList');
+  if (!el) return;
+  if (scripts.length === 0) { el.innerHTML = '<div class="inv-select-empty">还没有脚本，点右下角 + 新建第一篇</div>'; return; }
+  el.innerHTML = scripts.map(s => `
+    <div class="list-item" onclick="openScriptModal('${s.id}')">
+      <div class="list-item-title">${escapeHtml(s.title)}</div>
+      <div class="list-item-desc">${escapeHtml((s.content || '').slice(0, 60)).replace(/\n/g, ' ') || '（暂无内容）'}</div>
+      <div class="linked-inv-item">${s.relatedIdeas && s.relatedIdeas.length ? ('灵感 ' + s.relatedIdeas.length + ' · ') : ''}${s.relatedInv && s.relatedInv.length ? ('食材 ' + s.relatedInv.length) : ''}</div>
+    </div>
+  `).join('');
+}
+function openScriptModal(id) {
+  let item = null;
+  if (id) item = DB.get('scripts').find(s => s.id === id);
+  editingId = id || null;
+  openModal(`
+    <div class="modal-header"><h3>${Svg.script} ${id ? '编辑脚本' : '新建脚本'}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-group"><label>脚本标题</label><input id="modal_script_title" value="${item ? escapeHtml(item.title) : ''}" placeholder="如：鸡肉南瓜泥 第3期"></div>
+    <div class="form-row">
+      <div class="form-group"><label>关联灵感</label>${renderIdeaSelector(item ? (item.relatedIdeas || []) : [], 'ideaSelectScript')}</div>
+      <div class="form-group"><label>用到的食材</label>${renderInvSelector(item ? (item.relatedInv || []) : [], 'invSelectScript')}</div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;justify-content:space-between">脚本内容
+        <button class="btn btn-sm" id="modal_script_content_ai" type="button" onclick="aiGenStandaloneScript()">AI 生成草稿</button>
+      </label>
+      <textarea id="modal_script_content" style="min-height:220px" placeholder="在此写脚本，或点「AI 生成草稿」自动起草">${item ? escapeHtml(item.content || '') : ''}</textarea>
+    </div>
+    <button class="btn btn-full" onclick="saveScript()">${id ? '保存修改' : '创建脚本'}</button>
+    ${id ? `<button class="btn btn-full btn-danger mt-2" onclick="deleteScript('${id}')">删除</button>` : ''}
+  `);
+}
+function saveScript() {
+  const title = document.getElementById('modal_script_title').value.trim();
+  if (!title) { showToast('请输入标题'); return; }
+  const content = document.getElementById('modal_script_content').value;
+  const relatedIdeas = getSelectedInvIds('ideaSelectScript');
+  const relatedInv = getSelectedInvIds('invSelectScript');
+  const scripts = DB.get('scripts');
+  if (editingId) {
+    const it = scripts.find(s => s.id === editingId);
+    if (it) Object.assign(it, { title, content, relatedIdeas, relatedInv, updatedAt: new Date().toISOString() });
+  } else {
+    scripts.push({ id: uid(), title, content, relatedIdeas, relatedInv, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+  DB.set('scripts', scripts);
+  closeModal(); renderScripts(); showToast('脚本已保存');
+}
+function deleteScript(id) { if (!confirm('删除这条脚本？')) return; DB.set('scripts', DB.get('scripts').filter(s => s.id !== id)); closeModal(); renderScripts(); }
+function openAISettings() {
+  const ai = DB.get('ai', {});
+  openModal(`
+    <div class="modal-header"><h3>${Svg.gear} AI 设置</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
+      密钥仅保存在你手机本地，不会上传到任何服务器；生成时由你的手机直接调用 AI 接口。<br>
+      推荐用 DeepSeek（便宜、中文好）：<a href="https://platform.deepseek.com" target="_blank" style="color:var(--primary-dark)">platform.deepseek.com</a> 获取密钥。
+    </div>
+    <div class="form-group"><label>服务商</label>
+      <select id="ai_provider" onchange="onAiProviderChange(this)">
+        <option value="deepseek" ${ai.provider !== 'openai' && ai.provider !== 'custom' ? 'selected' : ''}>DeepSeek</option>
+        <option value="openai" ${ai.provider === 'openai' ? 'selected' : ''}>OpenAI</option>
+        <option value="custom" ${ai.provider === 'custom' ? 'selected' : ''}>自定义</option>
+      </select>
+    </div>
+    <div class="form-group"><label>接口地址</label><input id="ai_baseurl" value="${escapeHtml(ai.baseUrl || 'https://api.deepseek.com/v1')}"></div>
+    <div class="form-group"><label>模型名</label><input id="ai_model" value="${escapeHtml(ai.model || 'deepseek-chat')}"></div>
+    <div class="form-group"><label>API 密钥</label><input id="ai_key" type="password" placeholder="sk-..." value="${escapeHtml(ai.apiKey || '')}"></div>
+    <button class="btn btn-full" onclick="saveAISettings()">保存设置</button>
+  `);
+}
+function onAiProviderChange(sel) {
+  const map = { deepseek: ['https://api.deepseek.com/v1', 'deepseek-chat'], openai: ['https://api.openai.com/v1', 'gpt-4o-mini'], custom: ['', ''] };
+  const m = map[sel.value] || map.deepseek;
+  document.getElementById('ai_baseurl').value = m[0];
+  document.getElementById('ai_model').value = m[1];
+}
+function saveAISettings() {
+  const ai = {
+    provider: document.getElementById('ai_provider').value,
+    baseUrl: document.getElementById('ai_baseurl').value.trim(),
+    model: document.getElementById('ai_model').value.trim(),
+    apiKey: document.getElementById('ai_key').value.trim()
+  };
+  DB.set('ai', ai);
+  closeModal(); showToast('AI 设置已保存');
+}
+function openAIFallback(promptText) {
+  openModal(`
+    <div class="modal-header"><h3>无法直连 AI</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px">
+      可能是网络问题，或该接口的浏览器跨域(CORS)限制。你可以复制下面的提示词，粘贴到 <b>DeepSeek / ChatGPT 网页</b> 生成脚本，再把结果贴回脚本框。
+    </div>
+    <textarea id="aiFallbackText" style="min-height:200px" readonly>${escapeHtml(promptText)}</textarea>
+    <button class="btn btn-full" onclick="copyText('aiFallbackText')">复制提示词</button>
+    <button class="btn btn-full btn-ghost mt-2" onclick="closeModal()">关闭</button>
+  `);
+}
+function copyText(id) {
+  const t = document.getElementById(id);
+  if (!t) return;
+  t.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  if (navigator.clipboard) navigator.clipboard.writeText(t.value).catch(() => {});
+  showToast('已复制，去 AI 网页粘贴即可');
+}
+
 // ===== Init =====
 function updateDateTime() {
   const d = new Date();
@@ -1500,6 +1717,7 @@ function migrateData() {
     if (c.status === 'planned') { c.status = 'selecting'; changed = true; }
     if (c.status === 'filming') { c.status = 'editing'; changed = true; }
     if (c.status === 'draft') { c.status = 'editing'; changed = true; }
+    if (c.script === undefined) { c.script = ''; changed = true; }
   });
   if (changed) DB.set('content', contents);
 
@@ -1535,7 +1753,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 window.addEventListener('appinstalled', () => { document.getElementById('installBanner').classList.remove('show'); showToast('已安装到桌面'); });
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js?v=12').then(reg => {
+  navigator.serviceWorker.register('sw.js?v=13').then(reg => {
     if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
